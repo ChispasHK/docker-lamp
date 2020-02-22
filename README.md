@@ -1,4 +1,4 @@
-# docker-lamp-template
+# Docker LAMP
 Docker template with LAMP stack (Apache, MySql, Php and PhpMyAdmin)
 
 ## Docker install
