@@ -122,7 +122,7 @@ http://localhost:81/
 
 ## Directory structure
 ```
-Docker-PHP/
+docker-lamp/
 ├── docker-compose.yml
 ├── Dockerfile
 ├── db_data
