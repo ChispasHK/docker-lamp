@@ -1,49 +1,133 @@
 # docker-lamp-template
 Docker template with LAMP stack (Apache, MySql, Php and PhpMyAdmin)
 
-## Prerequisites
-Prerequisites to run this application:
-* Docker ([https://docs.docker.com/install/](https://docs.docker.com/install/))
-* To deploy to Heroku: Heroku CLI ([https://devcenter.heroku.com/articles/heroku-cli](https://devcenter.heroku.com/articles/heroku-cli))
+## Docker install
+### The procedure to install docker in ubuntu is with the following commands:
 
-## Run and stop the containers 
-To run these containers:
+Update your existing list of packages:
+```
+sudo apt update
+```
+Install a few prerequisite packages which let apt use packages over HTTPS:
+```
+sudo apt install apt-transport-https ca-certificates curl software-properties-common
+```
+Then add the GPG key for the official Docker repository to your system:
+```
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+```
+Add the Docker repository to APT sources:
+```
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable"
+```
+Update the package database with the Docker packages from the newly added repo:
+```
+sudo apt update
+```
+Install Docker:
+```
+sudo apt install docker-ce
+```
+Check that it’s running:
+```
+sudo systemctl status docker
+```
+Install Docker compose:
+```
+sudo apt  install docker-compose
+``` 
+
+## Contents of Docker-compose.yml and Dockerfile
+### The file ``docker-compose.yml``
+```
+version: "3.1"
+services:
+#apache
+    www:
+        container_name: www
+        build: .
+        ports: 
+            - "80:80"
+        volumes:
+            - ./www:/var/www/html/
+        links:
+            - db
+        networks:
+            - default
+#mariadb
+    db:
+        image: mariadb:latest
+        ports: 
+            - "3306:3306"
+        command: --default-authentication-plugin=mysql_native_password
+        environment:
+            MYSQL_DATABASE: myDb
+            MYSQL_USER: user
+            MYSQL_PASSWORD: password
+            MYSQL_ROOT_PASSWORD: password 
+        volumes:
+            - ./db_data:/var/lib/mysql
+        networks:
+            - default
+#phpmyadmin
+    phpmyadmin:
+        container_name: phpmyadmin
+        image: phpmyadmin/phpmyadmin
+        links: 
+            - db:db
+        ports:
+            - 81:80
+        environment:
+            MYSQL_USER: user
+            MYSQL_PASSWORD: password
+            MYSQL_ROOT_PASSWORD: password
+volumes:
+    persistent:
+```
+### The file ``Dockerfile``
+```
+FROM php:7.3-apache 
+RUN docker-php-ext-install mysqli
+``` 
+
+## Run and stop the docker-compose
+
+Turn on the docker-compose
 ```
 docker-compose up
 ```
-or
-```
-docker-compose up -d
-```
-
-To stop containers and remove containers, networks, volumes, and images created by up:
+Turn off the docker-compose
 ```
 docker-compose down
 ```
 
-## Run the PHP application
-To run the application you must:
-* Open phpMyAdmin at [http://localhost:8081](http://localhost:8081).
-* Open simple PHP web application example at [http://localhost:8080](http://localhost:8080)
 
-## Bash shell
-To execute an interactive bash shell on the `www`, `db` or `phpmyadmin` containers:
+## Password
+### MariaDB
 ```
-docker-compose exec www bash
-docker-compose exec db bash
-docker-compose exec phpmyadmin bash
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: password 
 ```
 
-## Run MySql client
-To run the MySQL client:
+## So we can watch the web in local:
+### Apache
 ```
-docker-compose exec db mysql -u root -p
+http://localhost:80/
 ```
-or
+### PhPMyadmin
 ```
-docker-compose exec db bash
-mysql -u root -p
+http://localhost:81/
 ```
 
-## Deploy to Heroku
-[https://devcenter.heroku.com/categories/deploying-with-docker](https://devcenter.heroku.com/categories/deploying-with-docker)
+## Directory structure
+```
+Docker-PHP/
+├── docker-compose.yml
+├── Dockerfile
+├── db_data
+│   └──
+└── www
+    └──
+```
+
